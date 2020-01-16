@@ -329,5 +329,61 @@ nycflights13::flights %>%
   ggplot2::coord_quickmap()
 #looks like major derechos occurred, which caused high delaysw in the impacted areas (SE USA)
 
-###10.4 - Other Implementations
-#testing a commit
+###10.4 - Filtering Joins
+top_dest <- nycflights13::flights %>%
+  dplyr::count(dest, sort = TRUE) %>%
+  utils::head(10)
+top_dest
+
+nycflights13::flights %>%
+  dplyr::filter(dest %in% top_dest$dest)
+
+nycflights13::flights %>%
+  dplyr::semi_join(top_dest)
+
+nycflights13::flights %>%
+  dplyr::anti_join(nycflights13::planes, by = "tailnum") %>%
+  dplyr::count(tailnum, sort = TRUE)
+
+###10.4 Exercises
+
+##1
+nycflights13::flights %>%
+  dplyr::filter(is.na(tailnum), !is.na(dep_time))
+
+#if we filter to only flights that have no tailnum, we can see that dep_time looks NA for the first 10 rows
+#if we then filter to only flights that have no tailnum and a non-NA depature time, we get no result
+#therefore, all flights with no tailnum have no departure time...i.e., they didn't happen
+
+##2
+planes_100 <- nycflights13::flights %>%
+  dplyr::group_by(tailnum) %>%
+  dplyr::summarise(n = dplyr::n()) %>%
+  dplyr::filter(n > 100)
+
+nycflights13::flights %>%
+  dplyr::semi_join(planes_100)
+
+##3
+fueleconomy::vehicles
+fueleconomy::common
+fueleconomy::vehicles %>%
+  dplyr::semi_join(fueleconomy::common, by = c("make", "model"))
+
+##4
+nycflights13::flights
+
+worst_hours <- nycflights13::flights %>%
+  dplyr::group_by(year, month, day, hour) %>%
+  dplyr::summarise(delay = mean(arr_delay, na.rm = TRUE)) %>%
+  dplyr::arrange(-delay) %>%
+  utils::head(48)
+
+nycflights13::weather %>%
+  dplyr::semi_join(worst_hours, by = c("year", "month", "day", "hour")) %>%
+  dplyr::arrange(year, month, day, hour) %>%
+  print(n = 100)
+
+#I don't see anything that quickly jumps out here...
+#----------some room to do some EDA if I felt so inclined!
+
