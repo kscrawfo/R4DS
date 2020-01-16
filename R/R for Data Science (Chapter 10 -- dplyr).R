@@ -330,6 +330,7 @@ nycflights13::flights %>%
 #looks like major derechos occurred, which caused high delaysw in the impacted areas (SE USA)
 
 ###10.4 - Filtering Joins
+<<<<<<< HEAD
 top_dest <- nycflights13::flights %>%
   dplyr::count(dest, sort = TRUE) %>%
   utils::head(10)
@@ -386,4 +387,6 @@ nycflights13::weather %>%
 
 #I don't see anything that quickly jumps out here...
 #----------some room to do some EDA if I felt so inclined!
+=======
+>>>>>>> 1de34f79309b4ec6dcdf5faf45d157a244ccf964
 
