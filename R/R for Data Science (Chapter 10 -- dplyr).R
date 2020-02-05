@@ -364,18 +364,18 @@ planes_100 <- nycflights13::flights %>%
 nycflights13::flights %>%
   dplyr::semi_join(planes_100)
 
-##3
+## 3
 fueleconomy::vehicles
 fueleconomy::common
 fueleconomy::vehicles %>%
   dplyr::semi_join(fueleconomy::common, by = c("make", "model"))
 
-##4
+## 4
 nycflights13::flights
 
 worst_hours <- nycflights13::flights %>%
-  dplyr::group_by(year, month, day, hour) %>%
-  dplyr::summarise(delay = mean(arr_delay, na.rm = TRUE)) %>%
+  dplyr::group_by(origin, year, month, day, hour) %>%
+  dplyr::summarise(delay = mean(dep_delay, na.rm = TRUE)) %>%
   dplyr::arrange(-delay) %>%
   utils::head(48)
 
@@ -384,6 +384,24 @@ nycflights13::weather %>%
   dplyr::arrange(year, month, day, hour) %>%
   print(n = 100)
 
-#I don't see anything that quickly jumps out here...
-#----------some room to do some EDA if I felt so inclined!
+# I don't see anything that quickly jumps out here...
+# ----------some room to do some EDA if I felt so inclined!
 
+## 5
+dplyr::anti_join(nycflights13::flights, nycflights13::airports, by = c("dest" = "faa"))
+
+nycflights13::airports %>%
+  dplyr::filter(faa == "SJU")
+# This gives me flights that are to airports that don't have a record in the airports table
+
+dplyr::anti_join(nycflights13::airports, nycflights13::flights, by = c("faa" = "dest"))
+# this gives me airports that are in the airports table that no flights have flown to
+
+## 6
+nycflights13::flights %>%
+  dplyr::filter(!is.na(tailnum)) %>%
+  dplyr::group_by(tailnum) %>%
+  dplyr::summarise(n = dplyr::n_distinct(carrier)) %>%
+  dplyr::filter(n > 1)
+
+# 17 planes flew for more than 1 carrier in this timeframe
