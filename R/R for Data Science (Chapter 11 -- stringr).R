@@ -151,6 +151,7 @@ str_view("a$^$","\\$\\^\\$")
 
 ## 2
 length(words)
+<<<<<<< HEAD
 #a
 str_view(words, "^a", match = TRUE)
 #b
@@ -245,5 +246,3 @@ str_view(words, "([aeiou][^aeiou]){2}", match = TRUE)
 ## 4
 str_view("B", ".*M?O.*")
 # I'm stuck on the concept of the capturing group for regex...wtf does that mean? Need to find a good explanation / reference...or skip it
-
-
