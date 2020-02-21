@@ -151,9 +151,99 @@ str_view("a$^$","\\$\\^\\$")
 
 ## 2
 length(words)
+#a
 str_view(words, "^a", match = TRUE)
+#b
 str_view(words, "e$", match = TRUE)
+#c
 str_view(words, "^...$", match = TRUE)
+#d
 str_view(words, ".......", match = TRUE)
 
 ### 11.4 character classes and alternatives
+str_view(c("grey", "gray"), "gr(e|a)y")
+
+### 11.4 exercises
+## 1
+#a
+str_view(words, "^(a|e|i|o|u)", match = TRUE)
+str_view(words, "^[aeiou]", match = TRUE)
+#b
+str_view(words, "^[^aeiou]+$", match = TRUE)
+#c
+str_view(words, "ed$", match = TRUE)
+str_view(words, "[^e]ed$", match = TRUE)
+#d
+str_view(words, "(ing|ize)$", match = TRUE)
+
+## 2
+# so this isn't a rule as written...you need the rest of the rule!
+str_view(words, "ei", match = TRUE)
+
+# we could verify it this way...which should come out with no matches...
+str_view(words, "ei|cie", match = TRUE)
+
+## 3
+str_view(words, "q[^u]", match = TRUE)
+# ...yes, at least in this data set
+str_view(words, "q", match = TRUE)
+
+## 4
+# there should be a locale specific way to write this...but i don't know exactly how
+# trying to go after individual patterns seems unreasonable
+str_view(words, "ou", match = TRUE)
+
+## 5
+str_view("(123) 456-7890", "\\(\\d\\d\\d\\)\\s\\d\\d\\d-\\d\\d\\d\\d")
+
+### 11.5 repetition
+x <- "1888 is the longest year in Roman numerals: MDCCCLXXXVIII"
+str_view(x, "CC")
+str_view(x, "CC?")
+str_view(x, "CC+")
+str_view(x, "CC*")
+str_view(x, "CLX+")
+str_view(x, "C+L?X+V")
+str_view(x, "C{3}")
+str_view(x, "C{1,}")
+str_view(x, "C{1,2}")
+str_view(x, "C{1,2}?")
+str_view(x, "C[LX]+?")
+
+### 11.5 exercises
+## 1
+# ? = {0,1}
+# + = {1,}
+# * = {0,}
+
+## 2
+# a
+# ^.*$ = string with at least 0 characters
+
+# b
+# "\\{.+\\}" = string with at least 1 character between curly braces
+
+# c
+# \d{4}-\d{2}-\d{2} = string with 4 digits followed by 2 digits followed by 2 digits
+
+# d
+# "\\\\{4}" = string with 4 backslashes
+
+## 3
+# a
+# ^[^aeiou]{3}
+str_view(words, "^[^aeiou]{3}", match = TRUE)
+
+# b
+# [a|e|i|o|u]{3}
+str_view(words, "[a|e|i|o|u]{3}", match = TRUE)
+
+# c
+# ([a|e|i|o|u]^[a|e|i|o|u]){2}
+str_view(words, "([aeiou][^aeiou]){2}", match = TRUE)
+
+## 4
+str_view("B", ".*M?O.*")
+# I'm stuck on the concept of the capturing group for regex...wtf does that mean? Need to find a good explanation / reference...or skip it
+
+
