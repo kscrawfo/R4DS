@@ -246,3 +246,207 @@ str_view(words, "([aeiou][^aeiou]){2}", match = TRUE)
 ## 4
 str_view("B", ".*M?O.*")
 # I'm stuck on the concept of the capturing group for regex...wtf does that mean? Need to find a good explanation / reference...or skip it
+
+### 11.6 Grouping and Backreferences
+str_view(fruit, "(..)\\1", match = TRUE)
+
+### 11.6 exercises
+## 1
+# a: (.)\1\1
+# didn't escape the \1...so it will find any char followed by the \1 char twice
+# if did escape "(.)\\1\\1" then it would find 3 char in a row
+
+# b: (.)(.)\\2\\1
+# a pair of char followed by the same pair in reverse order
+
+# c: (..)\1
+# didn't escape the \1, so it will match any 2 char followed by a \1 char
+# id did escape it "(..)\\1" then it would be any two char followed by the same 2 char
+
+# d: (.).\\1.\\1
+# any char a, any char b, any char a, any char c, any char a
+
+# e: "(.)(.)(.).*\\3\\2\\1"
+# any char a, any char b, any char c, then any char d (at least 0 times), then char c, char b, char a
+
+## 2
+# a
+"^(.).*\\1$"
+str_view(words, "^(.).*\\1$", match = TRUE)
+
+# b
+"(..).*\\1"
+str_view(words, "(..).*\\1", match = TRUE)
+
+# c
+"(.).*\\1.*\\1"
+str_view(words, "(.).*\\1.*\\1", match = TRUE)
+
+### 11.7 Tools
+x <- c("apple", "banana", "pear")
+str_detect(x, "e")
+
+sum(str_detect(words, "t$"))
+
+mean(str_detect(words, "^[aeiou]"))
+
+no_vowels_1 <-!str_detect(words, "[aeiou]")
+
+no_vowels_2 <- str_detect(words, "^[^aeiou]+$")
+
+identical(no_vowels_1, no_vowels_2)
+
+str_subset(words, "x$")
+
+df <- tibble::tibble(
+  word = words,
+  i = seq_along(word)
+)
+
+df %>%
+  dplyr::filter(str_detect(words, "x$"))
+
+str_count(x, "a")
+
+df %>%
+  dplyr::mutate(
+    vowels = str_count(word, "[aeiou]"),
+    consonants = str_count(word, "[^aeiou]")
+  )
+
+str_count("abababa", "aba")
+str_view_all("abababa", "aba")
+
+### 11.7 exercises
+## 1
+# a
+df %>%
+  dplyr::filter(str_detect(words, "^x|x$"))
+
+df %>%
+  dplyr::filter(str_detect(words, "^x") | str_detect(words, "x$"))
+
+# b
+df %>%
+  dplyr::filter(str_detect(words, "^[aeiou].*[^aeiou]$"))
+
+df %>%
+  dplyr::filter(str_detect(words, "^[aeiou]") & str_detect(words, "[^aeiou]$"))
+
+# c
+df %>%
+  dplyr::filter(str_detect(words, "a") &
+                  str_detect(words, "e") &
+                  str_detect(words, "i") &
+                  str_detect(words, "o") &
+                  str_detect(words, "u"))
+
+# d
+df <- df %>%
+  dplyr::mutate(vowels = str_count(words, "[aeiou]"),
+                prop = vowels / str_count(words, ".")
+  )
+
+df %>%
+  dplyr::arrange(desc(vowels))
+
+df %>%
+  dplyr::arrange(desc(prop))
+
+### 11.8 Extract Matches
+length(sentences)
+
+head(sentences)
+
+colors <- c(
+  "red", "orange", "yellow", "green", "blue", "purple"
+)
+
+color_match <- str_c(colors, collapse = "|")
+color_match
+
+has_color <- str_subset(sentences, color_match)
+matches <- str_extract(has_color, color_match)
+head(matches)
+
+more <- sentences[str_count(sentences, color_match) > 1]
+str_view_all(more, color_match)
+
+str_extract(more, color_match)
+
+str_extract_all(more, color_match)
+
+str_extract_all(more, color_match, simplify = TRUE)
+
+### 11.7 exercises
+## 1
+color_match <- str_c("\\b(", color_match, ")\\b")
+color_match
+more <- sentences[str_count(sentences, color_match) > 1]
+more
+
+## 2
+# a
+str_extract(sentences, "[A-ZAa-z]+") %>%
+  head()
+
+# b
+str_extract_all(sentences, "\\b[^\\s]+ing\\b", simplify = TRUE)
+
+# c
+# stupid ask - what about fish? too many confusions in english...there are surely some resources for doing this...
+
+### 11.9 Grouped Matches
+noun <- "(a|the) ([^ ]+)"
+has_noun <- sentences %>%
+  str_subset(noun) %>%
+  head(20)
+
+has_noun %>%
+  str_extract(noun)
+
+has_noun %>%
+  str_match(noun)
+
+tidyr::tibble(sentence = sentences) %>%
+  tidyr::extract(sentence, c("article", "noun"), "(a|the) ([^ ]+)",
+                 remove = FALSE)
+
+### 11.8 Exercises
+## 1
+number_words <- c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+number_words <- str_c(number_words, collapse = "|")
+number_words <- str_c("(",number_words, ") ([^ ]+)")
+str_match(sentences, number_words)
+
+## 2
+str_match(sentences, "([^ ]+)'([^ ]+)")
+
+### 11.9 Replacing Matches
+str_replace(x, "[aeiou]", "-")
+str_replace_all(x, "[aeiou]", "-")
+
+x <- c("1 house", "2 cars", "3 people")
+str_replace_all(x, c("1" = "one", "2" = "two", "3" = "three"))
+
+sentences %>%
+  str_replace("([^ ]+) ([^ ]+) ([^ ]+)", "\\1 \\3 \\2")
+
+### 11.9 exercises
+## 1
+writeLines("//")
+str_replace_all("/a/b/c", "/", "\\\\")
+
+## 2
+?str_to_lower
+# create a replacement vector
+replacements <- c("A" = "a", "B" = "b") #...
+# replace matches to the vector
+str_replace_all("AAABBBCCCdddeee", pattern = replacements)
+
+## 3
+swapped <- str_replace_all(words, "^([A-Za-z])(.*)([A-Za-z])$", "\\3\\2\\1")
+head(swapped)
+intersect(words,swapped)
+
+### 11.10 Splitting
