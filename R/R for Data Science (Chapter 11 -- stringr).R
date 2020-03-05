@@ -450,3 +450,125 @@ head(swapped)
 intersect(words,swapped)
 
 ### 11.10 Splitting
+sentences %>%
+  head(5) %>%
+  str_split(" ")
+
+"a|b|c|d" %>%
+  str_split("\\|") %>%
+  .[[1]]
+
+sentences %>%
+  head(5) %>%
+  str_split(" ", simplify = TRUE)
+
+fields <- c("Name: Kyle", "Country: USA", "Age: 33")
+fields %>%
+  str_split(": ", n = 2, simplify = TRUE)
+
+x <-  "This is a sentence. This is another sentence."
+x %>%
+  str_view_all(boundary("word"))
+
+str_split(x, " ")[[1]]
+
+str_split(x, boundary("word"))[[1]]
+
+### 11.10 exercises
+## 1
+x <- "apples, pear, and bananas"
+str_split(x, boundary("word"))[[1]]
+
+## 2
+# splitting by word boundary is better than by " " because " " will give you punctuation with the words...
+
+## 3
+x <- ""
+str_split(x, " ")
+
+# it isn't split into anything...it just is an empty string
+
+### 11.11 Other Types of Patterns
+
+str_view(fruit, "nana")
+str_view(fruit, regex("nana"))
+
+bananas <- c("Bananas", "BANANAS", "bAnAnAs")
+str_view(bananas, regex("bananas", ignore_case = TRUE))
+
+x <- "Line1\nLine 2\nLine3"
+str_extract_all(x, "^Line")[[1]]
+str_extract_all(x, regex("^Line",multiline = TRUE))[[1]]
+
+phone <- regex("
+               \\(?     # optional opening parens
+               (\\d{3}) # area code
+               [)- ]?   # optional closing parens, dash, or space
+               (\\d{3}) # three prefix
+               [ -]?    # optional space or dash
+               (\\d{4}) #last 4 numbers
+               #...
+               ", comments = TRUE)
+
+str_match("123-456-7890", phone)
+
+a1 <- "\u00e1"
+a2 <- "a\u0301"
+
+str_detect(a1, fixed(a2))
+str_detect(a1, coll(a2))
+
+stringi::stri_locale_info()
+
+x <- "this is a sentence."
+str_view_all(x, boundary("word"))
+
+str_extract_all(x, boundary("word"))
+
+### 11.11 exercises
+## 1
+x <- "this is a \\ string"
+f_slash <- "\\"
+
+str_detect(x, fixed(f_slash))
+str_detect(x, regex("\\\\"))
+
+## 2
+words <- tibble::tibble(word = unlist(str_extract_all(sentences, boundary("word"))))
+
+words %>%
+  dplyr::mutate(word = str_to_lower(word)) %>%
+  dplyr::count(word) %>%
+  dplyr::arrange(desc(n)) %>%
+  head(5)
+
+apropos("replace") # find me everything in the global enviro with "replace" in it
+apropos("words")
+
+dir(pattern = "\\.csv$")
+
+### 11.12 exercises
+## 1
+# a
+library(stringi)
+s_list <- unlist(ls("package:stringi"))
+str_subset(s_list, ".*count.*")
+
+?stri_count
+?stri_count_words
+# stri_count_words seems like the right function
+
+# b
+str_subset(s_list, ".*duplicate.*")
+?stri_duplicated
+# stri_duplicated
+
+# c
+str_subset(s_list, ".*rand.*")
+?stri_rand_strings
+
+# stri_rand_strings
+
+## 2
+?stri_sort()
+# opts_collator = stri_opts_collator(locale = _____)
