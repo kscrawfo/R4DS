@@ -40,6 +40,7 @@ gss_cat %>%
   geom_bar() +
   scale_x_discrete(drop = FALSE)
 
+<<<<<<< HEAD
 ### 12.1 Exercises
 
 ## 1
@@ -137,3 +138,5 @@ by_age %>%
   ggplot(aes(age, prop, color = fct_reorder2(marital, age, prop))) +
   geom_line() +
   labs(color = "marital")
+=======
+>>>>>>> 601fd6bc3c70a209ecc454a5817205c019516160
