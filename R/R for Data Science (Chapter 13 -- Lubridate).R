@@ -82,3 +82,83 @@ mdy("12/30/14")
 
 ### Date-time components
 
+datetime <- ymd_hms("2016-07-08 12:34:56")
+
+year(datetime)
+month(datetime)
+mday(datetime)
+day(datetime)
+yday(datetime)
+wday(datetime)
+month(datetime, label = TRUE)
+wday(datetime, label = TRUE)
+
+flights_dt %>%
+  mutate(wday = wday(dep_time, label = TRUE)) %>%
+  ggplot(aes(x = wday)) +
+  geom_bar()
+
+flights_dt %>%
+  mutate(minute = minute(dep_time)) %>%
+  group_by(minute) %>%
+  summarise(
+    avg_delay = mean(arr_delay, na.rm = TRUE),
+    n = n()) %>%
+  ggplot(aes(minute, avg_delay)) +
+  geom_line()
+
+sched_dep <- flights_dt %>%
+  mutate(minute = minute(sched_dep_time)) %>%
+  group_by(minute) %>%
+  summarise(
+    avg_delay = mean(arr_delay, na.rm = TRUE),
+    n = n())
+
+ggplot(sched_dep, aes(minute, avg_delay)) +
+  geom_line()
+
+ggplot(sched_dep, aes(minute, n)) +
+  geom_line()
+
+flights_dt %>%
+  count(week = floor_date(dep_time, "week")) %>%
+  ggplot(aes(week, n)) +
+  geom_line()
+
+year(datetime) <- 2020
+month(datetime) <- 7
+hour(datetime) <- 23
+
+update(datetime, year = 2021, month = 4, mday = 7, hour = 17)
+ymd("2015-02-01") %>%
+  update(mday = 35)
+
+flights_dt %>%
+  mutate(dep_hour = update(dep_time, yday = 1)) %>%
+  ggplot(aes(dep_hour)) +
+  geom_freqpoly(binwidth = 1000)
+
+### 13.2 exercises
+## 1
+## how does the distribution of flights within a day change over the course of a year?
+# i think a way to think about this would be to show a box plot of month (or week?) <- bad idea
+# show a smoothed line for the number of flights per time of day by month
+
+flights_dt %>%
+  mutate(
+    yday = month(dep_time),
+    tday = hour(dep_time)
+  ) %>%
+  group_by(yday, tday) %>%
+  tally() %>%
+  ggplot() +
+  geom_smooth(aes(yday, tday))
+
+# looks like the time of day for the flights is initially decreasing to an average of about 11am, then climbs to about 1215 thought september, to fall back to 11am by the end of the year
+# this doesn't feel right, but having trouble cleaning it up / figuring out what I'm missing...
+
+## 2
+flights %>%
+  mutate(delta = dep_time - sched_dep_time - dep_delay) %>%
+  select(delta, sched_dep_time, dep_time, dep_delay) %>%
+  arrange(-desc(delta))
