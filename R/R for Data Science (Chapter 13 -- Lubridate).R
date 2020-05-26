@@ -141,8 +141,10 @@ flights_dt %>%
 ### 13.2 exercises
 ## 1
 ## how does the distribution of flights within a day change over the course of a year?
-# i think a way to think about this would be to show a box plot of month (or week?) <- bad idea
-# show a smoothed line for the number of flights per time of day by month
+# option 1: i think a way to think about this would be to show a box plot of month (or week?) <- bad idea
+#  This did not work...
+# option 2: show a dot plot that shows how many flights occurred each month by month
+#  It does not appear that there is significant difference here
 
 flights_dt %>%
   mutate(
@@ -150,12 +152,21 @@ flights_dt %>%
     tday = hour(dep_time)
   ) %>%
   group_by(yday, tday) %>%
-  tally() %>%
-  ggplot() +
-  geom_smooth(aes(yday, tday))
+  tally %>%
+  ggplot(aes(yday, tday, size = n)) +
+  geom_point()
 
-# looks like the time of day for the flights is initially decreasing to an average of about 11am, then climbs to about 1215 thought september, to fall back to 11am by the end of the year
-# this doesn't feel right, but having trouble cleaning it up / figuring out what I'm missing...
+# option 3: show a smoothed curve of the mean + CI (geom_smooth)
+#  This shows that there is no real pattern - maybe a slightly later average around March-April, and slightly earlier Sep-Oct, but very minor
+flights_dt %>%
+  mutate(
+    yday = month(dep_time),
+    tday = hour(dep_time)
+  ) %>%
+  ggplot(aes(yday, tday)) +
+  geom_smooth() +
+  ylim(0,24)
+
 
 ## 2
 flights %>%
