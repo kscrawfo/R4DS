@@ -169,7 +169,95 @@ flights_dt %>%
 
 
 ## 2
-flights %>%
-  mutate(delta = dep_time - sched_dep_time - dep_delay) %>%
-  select(delta, sched_dep_time, dep_time, dep_delay) %>%
-  arrange(-desc(delta))
+flights_dt %>%
+  select(sched_dep_time, dep_time, dep_delay) %>%
+  mutate(delta = sched_dep_time + minutes(dep_delay) - dep_time) %>%
+  filter(delta != 0)
+
+
+# there are 1205 flights that have either incorrect scheduled or actual depature dates - they are off by exactly 1 day. There are no other anomolies
+
+## 3
+# join in time zones for the destination airports from the airports dataframe
+# for the airports missing a timezone, they are all in the America/Puerto_Rico tz...so can use that
+# convert all times to UTC time
+
+make_datetime_tz <- function(df=NULL, tz_var=NULL){
+  df %>%
+    mutate(arr_tim_n = lubridate::make_datetime(year=year, month=month, day=day, arr_time %/% 100, arr_time %% 100, tz = {{tz_var}}))
+}
+
+temp <- flights %>%
+  left_join(airports, by = c("dest" = "faa")) %>%
+  mutate(tzone = if_else(is.na(tzone), "America/Puerto_Rico", tzone))
+
+temp$tzone[1] = "America/New_York"
+
+temp <- temp %>%
+  mutate(dep_time_n = make_datetime(year, month, day, dep_time %/% 100, dep_time %% 100, tz = "America/New_York"),
+         hour = arr_time %/% 100,
+         min = arr_time %% 100,
+         dep_time_2 = with_tz(dep_time_n, "UTC"),
+         arr_time_n = make_datetime(year, month, day, arr_time %/% 100, arr_time %% 100, tz = tzone),
+         arr_time_2 = with_tz(arr_time_n, "UTC"),
+         flight_duration = difftime(arr_time_n, dep_time_n, units = "mins"),
+         delta = flight_duration - air_time
+  )
+
+temp$arr_time_n[2]
+temp$arr_time_n[3]
+
+
+new_times <- purrr::pmap(.l = list(year=temp$year, month=temp$month, day=temp$day, hour=temp$hour, min=temp$min, tzone = temp$tzone),
+            function(year=year,month=month,day=day,hour=hour,min=min,tzone=tzone)
+              lubridate::make_datetime(year=year, month=month, day=day, hour=hour, min=min, tz = tzone))
+
+## try this with purr::pmap_dfr
+
+temp$arr_time_n <- as_datetime(unlist(new_times))
+
+temp$arr_time_2 <- with_tz(temp$arr_time_n, "UTC")
+
+
+
+temp <- flights %>%
+  left_join(airports, by = c("dest" = "faa")) %>%
+  mutate(tzone = if_else(is.na(tzone), "America/Puerto_Rico", tzone)) %>%
+  mutate(dep_time_n = make_datetime(year, month, day, dep_time %/% 100, dep_time %% 100, tz = "America/New_York"),
+         arr_time_n = make_datetime(year, month, day, arr_time %/% 100, arr_time %% 100, tz = tzone),
+         flight_duration = difftime(arr_time_n, dep_time_n, units = "mins"),
+         delta = flight_duration - air_time
+  )
+
+
+
+make_datetime_tz(temp, tz = "tzone")
+
+
+
+
+
+make_datetime(temp$year[3],
+              temp$month[3],
+              temp$day[3],
+              temp$arr_time[3] %/% 100,
+              temp$arr_time[3] %% 100,
+              tz_ny = temp$tzone[3]
+)
+
+
+
+make_datetime(temp$year[1],
+              temp$month[1],
+              temp$day[1],
+              temp$arr_time[1] %/% 100,
+              temp$arr_time[1] %% 100,
+              tz = temp$tzone[1]
+)
+
+with_tz(chi_time, "UTC")
+with_tz(ny_time, "UTC")
+
+airports
+?flights
+?make_datetime
